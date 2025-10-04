@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template
 import pandas as pd
+import uvicorn
 
 app = Flask(__name__)
 
