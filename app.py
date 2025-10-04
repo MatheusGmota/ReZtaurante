@@ -1,6 +1,5 @@
 from flask import Flask, request, render_template
 import pandas as pd
-import uvicorn
 
 app = Flask(__name__)
 
@@ -10,23 +9,26 @@ def index():
 
 @app.route('/display', methods=['POST'])
 def display_file():
-    file = request.files['file']
+    file = request.files.get('file')
     if not file:
-        return "No file"
+        return "Nenhum arquivo enviado", 400
 
-    # Tenta ler o arquivo com diferentes codificações
     try:
         df = pd.read_csv(file, delimiter=";")
     except UnicodeDecodeError:
-        file.seek(0)  # Reseta o ponteiro do arquivo
+        file.seek(0)
         try:
             df = pd.read_csv(file, encoding='latin1', delimiter=";")
         except UnicodeDecodeError:
-            file.seek(0)  # Reseta o ponteiro do arquivo
+            file.seek(0)
             df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=";")
 
-    # Renderiza o template com os dados do arquivo CSV
-    return render_template('display.html', tables=[df.to_html(classes='data')], titles=df.columns.values)
+    try:
+        html_table = df.to_html(classes='data', index=False)
+        return render_template('display.html', tables=[html_table], titles=df.columns.values)
+    except Exception as e:
+        return f"Erro ao renderizar o arquivo: {str(e)}", 500
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
