@@ -13,15 +13,17 @@ def display_file():
     if not file:
         return "Nenhum arquivo enviado", 400
 
+    delimiter = ","
+    
     try:
-        df = pd.read_csv(file, delimiter=";")
+        df = pd.read_csv(file, delimiter=delimiter)
     except UnicodeDecodeError:
         file.seek(0)
         try:
-            df = pd.read_csv(file, encoding='latin1', delimiter=";")
+            df = pd.read_csv(file, encoding='latin1', delimiter=delimiter)
         except UnicodeDecodeError:
             file.seek(0)
-            df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=";")
+            df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=delimiter)
 
     try:
         html_table = df.to_html(classes='data', index=False)
